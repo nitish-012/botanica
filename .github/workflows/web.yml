@@ -1,0 +1,63 @@
+# Web app: run every test, and publish to GitHub Pages only if all of them pass.
+# Runs on every push to main (any file), and by hand from the Actions tab.
+# Tests have no network access to anything except a local test server.
+
+name: Web app — test & publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      TZ: America/Los_Angeles
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Unit, data and security tests
+        run: node --test "tests/unit/*.test.js"
+      - name: Install test browser (pinned)
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.63.0
+          npx --no-install playwright install --with-deps chromium
+      - name: End-to-end tests (all outside network requests blocked)
+        run: node --test "tests/e2e/*.test.js"
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
