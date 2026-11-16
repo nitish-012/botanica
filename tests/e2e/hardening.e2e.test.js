@@ -169,8 +169,7 @@ test("a garden of 100 plants restores and renders within a few seconds", { skip 
   await ctx.close();
 });
 
-// Known gap, kept visible: remove `todo` once checkWeather() only re-renders when the garden is still showing.
-test("a slow weather check doesn't repaint the garden over another screen", { skip, todo: "fix race in checkWeather()" }, async () => {
+test("a slow weather check doesn't repaint the garden over another screen", { skip }, async () => {
   const { ctx, page } = await phone({ weather: async (route) => { await new Promise((r) => setTimeout(r, 800)); route.abort(); } });
   await restore(page, { plants: [{ id: "p-1", nickname: "Pothy" }], settings: { location: { lat: 40.12, lon: -100.46, label: "Test" } } });
   await page.goto(base + "/#/garden"); await page.click("#wxBtn");

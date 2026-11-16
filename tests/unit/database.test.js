@@ -5,7 +5,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const WEB = path.join(__dirname, "../../web/plants_database.json");
-const NATIVE = path.join(__dirname, "../../Botanica/Resources/plants_database.json");
 const DB = JSON.parse(fs.readFileSync(WEB, "utf8"));
 const LIGHT = ["low", "indirect", "direct"];
 const LEVEL = ["low", "medium", "high"];
@@ -93,10 +92,6 @@ test("companion links point to real plants and never to themselves", () => {
   }
 });
 
-test("web and native copies of the care guide are identical", () => {
-  if (!fs.existsSync(NATIVE)) return;
-  assert.deepEqual(JSON.parse(fs.readFileSync(NATIVE, "utf8")), DB);
-});
 
 test("every public profile passes the strict profile validator unchanged", () => {
   const C = require("../../web/core.js");

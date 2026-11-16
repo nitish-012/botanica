@@ -247,6 +247,8 @@ function setChrome({ title, back = false, action = null, tab }) {
   document.querySelectorAll(".tabbar a").forEach((el) => el.classList.toggle("active", el.dataset.tab === tab));
 }
 
+const currentPage = () => (location.hash.replace(/^#\/?/, "") || "garden").split(/[/?]/)[0];
+
 async function route() {
   const hash = location.hash.replace(/^#\/?/, "") || "garden";
   const [path, qs] = hash.split("?");
@@ -382,7 +384,8 @@ async function checkWeather(btn) {
   } catch (e) {
     toast(e.name === "AbortError" ? "The weather service took too long. Try again later." : (e.message || "Couldn't reach the weather service."));
   }
-  renderGarden();
+  // Only repaint if the garden is still on screen; the user may have moved on while it loaded.
+  if (currentPage() === "garden") renderGarden();
 }
 
 const TIP_ICON = { heat: I.sun, cold: I.temp, frost: I.temp, dry: I.mist, gloomy: I.drop, calm: I.leaf,
