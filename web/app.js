@@ -470,7 +470,7 @@ async function renderPlant(id) {
     </div>
 
     ${water ? `
-    <div class="callout info mt">${I.drop}<p><b>${water.ml} ml</b> per watering. ${esc(water.how)}.${prof ? " " + esc(prof.water.checkBeforeWatering) : " Check that the top few cm of soil are dry first."}</p></div>` : ""}
+    <div class="callout info mt">${I.drop}<p><b>${water.ml} ml</b> per watering. ${esc(water.how)}. Pour slowly around the stem in two passes and stop if water reaches the saucer.${prof ? " " + esc(prof.water.checkBeforeWatering) : " Check that the top few cm of soil are dry first."}</p></div>` : ""}
 
     ${plant.speciesId && !prof ? `
     <div class="callout warn mt">${I.alert}<p><b>Care guide missing on this phone.</b> Open Settings and restore your plant file again to add it.</p></div>` : ""}
@@ -577,7 +577,10 @@ function careInfo(p) {
 /** Fertilizer options: homemade first (preferred), then store-bought. */
 function feedHTML(p) {
   const f = p.fertilizer;
-  const item = (x) => `<div class="row top"><div class="ico">${I.leaf}</div><div class="txt"><b>${esc(x.name)}</b><span>${esc(x.how)}${x.caution ? `<br><i class="caution">${esc(x.caution)}</i>` : ""}</span></div></div>`;
+  const item = (x) => `<div class="row top"><div class="ico">${I.leaf}</div><div class="txt"><b>${esc(x.name)}</b><span>${esc(x.how)}</span>
+    ${x.amount ? `<span class="feed-kv"><b class="inline">How much:</b> ${esc(x.amount)}</span>` : ""}
+    ${x.when ? `<span class="feed-kv"><b class="inline">When:</b> ${esc(x.when)}</span>` : ""}
+    ${x.caution ? `<i class="caution">${esc(x.caution)}</i>` : ""}</div></div>`;
   return `
     <div class="section">
       <h3>Fertilizer options</h3>
@@ -1010,7 +1013,9 @@ async function importBackup(file) {
       await mergePrivateProfiles();
     }
     const extra = Object.keys(data.settings).length || data.profiles.length ? " and your settings" : "";
-    toast(`Restored ${data.plants.length} plant${data.plants.length === 1 ? "" : "s"}${extra}`);
+    toast(!data.plants.length && data.profiles.length
+      ? `Updated ${data.profiles.length} care guide${data.profiles.length === 1 ? "" : "s"}`
+      : `Restored ${data.plants.length} plant${data.plants.length === 1 ? "" : "s"}${extra}`);
     location.hash = "#/garden";
   } catch (e) {
     toast(e.message || "Restore failed");

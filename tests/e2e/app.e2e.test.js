@@ -394,3 +394,21 @@ test("fertilizing shows a winter rest instead of a far-off due date", { skip }, 
   await clean(page);
   await ctx.close();
 });
+
+test("a care-guide-only update file keeps the garden and its schedules untouched", { skip }, async () => {
+  const { ctx, page } = await phone();
+  await addPlant(page, { nickname: "Keep Me" });
+  const before = await page.evaluate(async () => (await DB.all("plants"))[0]);
+  const base_ = JSON.parse(fs.readFileSync(path.join(WEB, "plants_database.json"), "utf8")).plants[0];
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "botanica-")), "care.json");
+  fs.writeFileSync(file, JSON.stringify({ app: "botanica", version: 1, plants: [], events: [], photos: [], profiles: [{ ...base_, id: "new-herb", commonName: "New Herb" }] }));
+  await page.goto(base + "/#/settings");
+  await page.waitForSelector("#importInput", { state: "attached" });
+  await page.setInputFiles("#importInput", file);
+  await page.waitForFunction(() => /Updated 1 care guide/.test(document.querySelector("#toast").textContent));
+  const after = await page.evaluate(async () => (await DB.all("plants")));
+  assert.equal(after.length, 1);
+  assert.deepEqual(after[0], before);
+  await clean(page);
+  await ctx.close();
+});

@@ -115,8 +115,22 @@ test("waterML(): needs a pot size or a custom amount", () => {
 });
 
 test("waterML(): known values for a 15 cm plastic pothos pot", () => {
-  assert.deepEqual(C.waterML(plant(), POTHOS, JULY), { ml: 500, source: "growing" });
-  assert.deepEqual(C.waterML(plant(), POTHOS, DEC), { ml: 400, source: "winter" });
+  assert.deepEqual(C.waterML(plant(), POTHOS, JULY), { ml: 125, source: "growing" });
+  assert.deepEqual(C.waterML(plant(), POTHOS, DEC), { ml: 100, source: "winter" });
+});
+
+test("waterML(): no-runoff amounts follow common pot-size watering charts, never litres for a pot", () => {
+  // Average houseplant (fraction 0.2) in the growing season, plastic pot. Chart: 4" ≈ 60 ml, 6" ≈ 120 ml,
+  // 8" ≈ 240 ml, 10" ≈ 360 ml, 12" ≈ 480 ml (pour slowly; stop before it runs out of the bottom).
+  const avg = { water: { fractionOfPotVolume: 0.2 } };
+  const chart = [[10.2, 60], [15.2, 120], [20.3, 240], [25.4, 360], [30.5, 480]];
+  for (const [d, ref] of chart) {
+    const { ml } = C.waterML(plant({ potDiameterCm: d }), avg, JULY);
+    assert.ok(Math.abs(ml - ref) <= ref * 0.2, `${d} cm → ${ml} ml, chart says ~${ref} ml`);
+  }
+  // Even the thirstiest profile in a big 30 cm pot stays well under a litre.
+  const thirstiest = Math.max(...DB.plants.map((p) => p.water.fractionOfPotVolume));
+  assert.ok(C.waterML(plant({ potDiameterCm: 30 }), { water: { fractionOfPotVolume: thirstiest } }, JULY).ml < 1000);
 });
 
 test("waterML(): terracotta needs more, bigger pots need more, always a multiple of 25 and at least 25", () => {
@@ -124,7 +138,7 @@ test("waterML(): terracotta needs more, bigger pots need more, always a multiple
   const terracotta = C.waterML(plant({ potMaterial: "terracotta" }), POTHOS, JULY).ml;
   const big = C.waterML(plant({ potDiameterCm: 30 }), POTHOS, JULY).ml;
   assert.ok(terracotta > plastic);
-  assert.ok(big > plastic * 4);
+  assert.ok(big > plastic * 3);
   for (const d of [1, 3, 7.5, 12, 18, 25, 40]) {
     const { ml } = C.waterML(plant({ potDiameterCm: d }), POTHOS, JULY);
     assert.equal(ml % 25, 0);
@@ -298,4 +312,15 @@ test("the app's version label matches the service worker cache version", () => {
   assert.match(sw, /const VERSION = "botanica-" \+ BUILD;/);
   assert.match(app, /caches\.keys\(\)\)\.find\(\(k\) => k\.startsWith\("botanica-"\)\)/);
   assert.match(sw, /self\.skipWaiting\(\)/, "new versions must take over without waiting for every tab to close");
+});
+
+test("every fertilizer option says what to use, how much and when", () => {
+  for (const p of DB.plants) for (const f of [...p.fertilizer.homemade, ...p.fertilizer.storeBought]) {
+    assert.ok(f.name && f.how && f.amount && f.when, `${p.id}: ${f.name}`);
+  }
+  const bad = { ...POTHOS, fertilizer: { ...POTHOS.fertilizer, homemade: [{ name: "n", how: "h", amount: "x".repeat(900), when: 7, caution: "" }] } };
+  const f = C.cleanProfile(bad).fertilizer.homemade[0];
+  assert.equal(f.amount.length, 300);
+  assert.equal("when" in f, false, "non-text 'when' is dropped");
+  assert.equal("caution" in f, false, "empty caution is dropped");
 });

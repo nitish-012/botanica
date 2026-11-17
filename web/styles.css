@@ -323,3 +323,5 @@ main, .sheet, .card, .panel, .detail-head { min-width: 0; overflow-wrap: anywher
 .opt input { accent-color: var(--brand); width: 18px; height: 18px; flex: none; }
 .opt span { display: flex; flex-direction: column; }
 .opt small { color: var(--ink-3); font-size: 12px; }
+.feed-kv { display: block; margin-top: 4px; }
+.row .txt .caution { display: block; margin-top: 4px; }

@@ -25,7 +25,7 @@
       "water": {
         "intervalDaysGrowing": 8,
         "intervalDaysDormant": 14,
-        "fractionOfPotVolume": 0.25,
+        "fractionOfPotVolume": 0.2,
         "checkBeforeWatering": "Water when the top 2–3 cm of soil is dry. Slight leaf droop is a reliable 'I'm thirsty' signal.",
         "method": "Water slowly and evenly until it drains from the bottom, then empty the saucer after 10 minutes.",
         "signsOfOverwatering": [
@@ -65,31 +65,36 @@
           1,
           2
         ],
-        "notes": "Never fertilize dry soil — water first. Skip feeding for a month after repotting.",
+        "notes": "Fast leafy grower: nitrogen for leaves, potassium for strong stems.",
         "homemade": [
           {
-            "name": "Worm-casting tea",
-            "how": "Stir 1 tablespoon of worm castings (vermicompost) into 1 litre of water, let it sit overnight, strain, and use it in place of a normal watering.",
-            "caution": "Indoors, organic feeds can attract fungus gnats. Let the top of the soil dry between waterings."
+            "name": "Worm-casting tea (liquid feed)",
+            "how": "Soak 1 cup of worm castings in 1 gallon (3.8 L) of water for 24 hours, stirring a few times, then strain. Dilute 1 part tea to 3 parts water. Use within 48 hours.",
+            "amount": "Use it in place of the plant's normal watering amount shown in the app.",
+            "when": "Every 4 weeks, March–October.",
+            "caution": "Organic feeds can attract fungus gnats indoors. Let the topsoil dry between waterings."
           },
           {
-            "name": "Worm-casting top-dressing",
-            "how": "In spring, scrape away 1 cm of old topsoil and replace it with worm castings or well-rotted compost. It feeds slowly for 2–3 months."
+            "name": "Worm castings or home compost (top-dressing)",
+            "how": "A gentle complete feed: nitrogen, phosphorus and potassium plus iron, manganese and zinc, released slowly. Scratch the soil surface lightly, sprinkle the castings around the stem (not against it), then water as usual.",
+            "amount": "1 tablespoon (15 ml) per 10 cm of pot width (e.g. 3 tbsp for a 30 cm pot). Keep the layer under 1 cm thick.",
+            "when": "Once in March and once in July."
           },
           {
-            "name": "Banana-peel water",
-            "how": "Soak 1–2 chopped banana peels in 1 litre of water for 2 days, strain, and dilute 1:1 with water. A mild potassium boost, not a complete feed.",
-            "caution": "Low in nutrients and can attract fruit flies. Use it alongside castings, not as the only feed."
+            "name": "Dried banana-peel powder (potassium)",
+            "how": "Fresh peels and banana water release very little and attract fungus gnats and fruit flies, so dry the peels instead: bake at 90 °C (200 °F) for 2–3 hours until brittle, grind to powder and keep it in a jar. It releases potassium slowly as it breaks down.",
+            "amount": "1 teaspoon (5 ml) per 15 cm of pot width, mixed into the top 2 cm of soil.",
+            "when": "Once in March and once in June.",
+            "caution": "A supplement, not a complete feed: mostly potassium. Use it alongside worm castings."
           }
         ],
         "storeBought": [
           {
-            "name": "Balanced liquid houseplant fertilizer",
-            "how": "A balanced N-P-K feed (e.g. 10-10-10, or 3-1-2 for foliage plants) at the dilution shown in the plant's care guide."
-          },
-          {
-            "name": "Slow-release granules",
-            "how": "Sprinkle on the soil in spring at the label rate for houseplants. Feeds for about 3 months; skip liquid feeds while it's working."
+            "name": "Miracle-Gro All Purpose Plant Food 24-8-16",
+            "how": "The water-soluble powder you have. Stir until fully dissolved and use the mix in place of the normal watering amount. Water first if the soil is bone dry. It already contains iron, manganese and zinc. A mixed gallon keeps for a few weeks with the cap on.",
+            "amount": "½ teaspoon (about 2.5 ml of powder) per 1 gallon (3.8 L) of water: the label's indoor rate.",
+            "when": "Every 4 weeks, March–October (skip the months you use worm-casting tea).",
+            "caution": "Use either this or a homemade liquid feed on a feeding day, not both."
           }
         ]
       },
@@ -234,7 +239,7 @@
       "water": {
         "intervalDaysGrowing": 18,
         "intervalDaysDormant": 35,
-        "fractionOfPotVolume": 0.18,
+        "fractionOfPotVolume": 0.15,
         "checkBeforeWatering": "Water only when the soil is completely dry all the way down. When in doubt, wait another week.",
         "method": "Water the soil, not the leaf rosette, until it drains. Never let it sit in water.",
         "signsOfOverwatering": [
@@ -274,21 +279,22 @@
           1,
           2
         ],
-        "notes": "Light feeder. Two or three feeds per growing season are plenty.",
+        "notes": "Very light feeder: one or two feeds a year is plenty. Over-feeding causes weak, floppy leaves.",
         "homemade": [
           {
-            "name": "Worm-casting top-dressing",
-            "how": "In spring, scrape away 1 cm of old topsoil and replace it with worm castings or well-rotted compost. It feeds slowly for 2–3 months."
+            "name": "Worm castings or home compost (top-dressing)",
+            "how": "A gentle complete feed: nitrogen, phosphorus and potassium plus iron, manganese and zinc, released slowly. Scratch the soil surface lightly, sprinkle the castings around the stem (not against it), then water as usual.",
+            "amount": "1 tablespoon (15 ml) per 10 cm of pot width. Snake plants need very little.",
+            "when": "Once a year, in April."
           }
         ],
         "storeBought": [
           {
-            "name": "Cactus & succulent fertilizer",
-            "how": "Half the label rate, at most monthly in spring and summer."
-          },
-          {
-            "name": "Balanced liquid houseplant fertilizer",
-            "how": "A balanced N-P-K feed (e.g. 10-10-10, or 3-1-2 for foliage plants) at the dilution shown in the plant's care guide."
+            "name": "Miracle-Gro All Purpose Plant Food 24-8-16",
+            "how": "The water-soluble powder you have. Stir until fully dissolved and use the mix in place of the normal watering amount. Water first if the soil is bone dry. It already contains iron, manganese and zinc. A mixed gallon keeps for a few weeks with the cap on.",
+            "amount": "¼ teaspoon (about 1.25 ml of powder) per 1 gallon (3.8 L) of water: half the label's indoor rate; snake plants need very little.",
+            "when": "Twice a year: April and July.",
+            "caution": "Use either this or a homemade liquid feed on a feeding day, not both."
           }
         ]
       },
@@ -415,7 +421,7 @@
       "water": {
         "intervalDaysGrowing": 8,
         "intervalDaysDormant": 14,
-        "fractionOfPotVolume": 0.25,
+        "fractionOfPotVolume": 0.22,
         "checkBeforeWatering": "Water when the top 5 cm of soil is dry.",
         "method": "Water thoroughly until it drains, then empty the saucer.",
         "signsOfOverwatering": [
@@ -455,26 +461,36 @@
           1,
           2
         ],
-        "notes": "Feed every few weeks in spring and summer when it's pushing new leaves.",
+        "notes": "Big leafy grower: nitrogen for leaves, potassium for strong stems, magnesium for deep green.",
         "homemade": [
           {
-            "name": "Worm-casting top-dressing",
-            "how": "In spring, scrape away 1 cm of old topsoil and replace it with worm castings or well-rotted compost. It feeds slowly for 2–3 months."
+            "name": "Worm-casting tea (liquid feed)",
+            "how": "Soak 1 cup of worm castings in 1 gallon (3.8 L) of water for 24 hours, stirring a few times, then strain. Dilute 1 part tea to 3 parts water. Use within 48 hours.",
+            "amount": "Use it in place of the plant's normal watering amount shown in the app.",
+            "when": "Every 4 weeks, March–October.",
+            "caution": "Organic feeds can attract fungus gnats indoors. Let the topsoil dry between waterings."
           },
           {
-            "name": "Worm-casting tea",
-            "how": "Stir 1 tablespoon of worm castings (vermicompost) into 1 litre of water, let it sit overnight, strain, and use it in place of a normal watering.",
-            "caution": "Indoors, organic feeds can attract fungus gnats. Let the top of the soil dry between waterings."
+            "name": "Worm castings or home compost (top-dressing)",
+            "how": "A gentle complete feed: nitrogen, phosphorus and potassium plus iron, manganese and zinc, released slowly. Scratch the soil surface lightly, sprinkle the castings around the stem (not against it), then water as usual.",
+            "amount": "1 tablespoon (15 ml) per 10 cm of pot width (e.g. 3 tbsp for a 30 cm pot). Keep the layer under 1 cm thick.",
+            "when": "Once in March and once in July."
+          },
+          {
+            "name": "Dried banana-peel powder (potassium)",
+            "how": "Fresh peels and banana water release very little and attract fungus gnats and fruit flies, so dry the peels instead: bake at 90 °C (200 °F) for 2–3 hours until brittle, grind to powder and keep it in a jar. It releases potassium slowly as it breaks down.",
+            "amount": "1 teaspoon (5 ml) per 15 cm of pot width, mixed into the top 2 cm of soil.",
+            "when": "Once in March and once in June.",
+            "caution": "A supplement, not a complete feed: mostly potassium. Use it alongside worm castings."
           }
         ],
         "storeBought": [
           {
-            "name": "Balanced liquid houseplant fertilizer",
-            "how": "A balanced N-P-K feed (e.g. 10-10-10, or 3-1-2 for foliage plants) at the dilution shown in the plant's care guide."
-          },
-          {
-            "name": "Slow-release granules",
-            "how": "Sprinkle on the soil in spring at the label rate for houseplants. Feeds for about 3 months; skip liquid feeds while it's working."
+            "name": "Miracle-Gro All Purpose Plant Food 24-8-16",
+            "how": "The water-soluble powder you have. Stir until fully dissolved and use the mix in place of the normal watering amount. Water first if the soil is bone dry. It already contains iron, manganese and zinc. A mixed gallon keeps for a few weeks with the cap on.",
+            "amount": "½ teaspoon (about 2.5 ml of powder) per 1 gallon (3.8 L) of water: the label's indoor rate.",
+            "when": "Every 4 weeks, March–October (skip the months you use worm-casting tea).",
+            "caution": "Use either this or a homemade liquid feed on a feeding day, not both."
           }
         ]
       },

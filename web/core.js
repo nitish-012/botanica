@@ -110,16 +110,20 @@
     return { level: "ok", kind: null };
   }
 
-  /* ---- Water amount in ml ---- */
+  /* ---- Water amount in ml ----
+   * A "no-runoff" amount: enough to re-wet the dried top of the pot, not to soak it until water
+   * pours out of the drainage hole. Calibrated to common pot-size watering charts for an average
+   * houseplant (10 cm ≈ 60 ml, 15 cm ≈ 125 ml, 20 cm ≈ 225 ml, 25 cm ≈ 350 ml, 30 cm ≈ 475 ml):
+   * ml ≈ 0.73 × d^1.9. A species' fractionOfPotVolume scales it, with 0.2 as the average plant.
+   */
+  const WATER_REF_FRACTION = 0.2;
   function waterML(plant, prof, now = Date.now()) {
     const override = Number(plant.waterOverrideMl);
     if (override > 0) return { ml: Math.round(override), source: "custom" };
     const d = Number(plant.potDiameterCm);
     if (!(d > 0)) return null;
-    const fraction = prof ? prof.water.fractionOfPotVolume : 0.22;
-    const r = d / 2, h = d * 0.9;
-    const soilMl = Math.PI * r * r * h * 0.85; // tapered pot, soil below the rim
-    let ml = soilMl * fraction * (POT_FACTOR[plant.potMaterial] || 1);
+    const fraction = prof ? prof.water.fractionOfPotVolume : WATER_REF_FRACTION;
+    let ml = 0.73 * Math.pow(d, 1.9) * (fraction / WATER_REF_FRACTION) * (POT_FACTOR[plant.potMaterial] || 1);
     const dormant = isDormant(now);
     if (dormant) ml *= 0.8;
     ml = Math.max(25, Math.round(ml / 25) * 25);
@@ -165,13 +169,14 @@
   const pMonths = (a) => (Array.isArray(a) ? [...new Set(a.map(Number).filter((m) => Number.isInteger(m) && m >= 1 && m <= 12))] : []);
   const pNum = (v, min, max) => { const n = Number(v); return Number.isFinite(n) && n >= min && n <= max ? n : null; };
   const obj = (v) => (v && typeof v === "object" ? v : {});
-  /** Fertilizer options: [{ name, how, caution? }], at most 6. */
+  /** Fertilizer options: [{ name, how, amount?, when?, caution? }], at most 6. */
   const pFerts = (a) => (Array.isArray(a) ? a.slice(0, 6).map((x) => {
     x = obj(x);
     const name = pStr(x.name, 80), how = pStr(x.how, 400);
     if (!name || !how) return null;
-    const caution = pStr(x.caution, 300);
-    return caution ? { name, how, caution } : { name, how };
+    const out = { name, how };
+    for (const [k, max] of [["amount", 300], ["when", 300], ["caution", 300]]) { const v = pStr(x[k], max); if (v) out[k] = v; }
+    return out;
   }).filter(Boolean) : []);
 
   /** Returns a sanitized profile with exactly the known fields, or null if anything essential is wrong. */
