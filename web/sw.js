@@ -2,7 +2,7 @@
 // It never sends data anywhere; it only serves the files listed below.
 // BUILD is a hash of every cached file. Run `node tests/helpers/stamp.js` after changing any app file;
 // the unit tests fail (and block publishing) if it is stale, so phones always pick up the update.
-const BUILD = "a3ddf3a6612e";
+const BUILD = "e7c2409944aa";
 const VERSION = "botanica-" + BUILD;
 const FILES = [
   "./",

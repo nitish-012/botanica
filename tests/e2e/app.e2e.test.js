@@ -412,3 +412,61 @@ test("a care-guide-only update file keeps the garden and its schedules untouched
   await clean(page);
   await ctx.close();
 });
+
+test("log several: water the plants that are due in one go (each its own ml), feed several, undo all", { skip }, async () => {
+  const { ctx, page } = await phone();
+  await page.clock.setFixedTime(new Date(2026, 6, 15, 10, 0));
+  const now = new Date(2026, 6, 15, 10, 0).getTime();
+  const at = (d) => { const x = new Date(now); x.setHours(0, 0, 0, 0); return x.getTime() + d * 86400000; };
+  const sch = (next) => ({ water: { on: true, every: 7, winterEvery: 14, last: null, next }, fertilize: { on: true, every: 30, last: null, next: at(20) } });
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "botanica-")), "b.json");
+  fs.writeFileSync(file, JSON.stringify({ app: "botanica", version: 1, events: [], photos: [], plants: [
+    { id: "p-a", nickname: "A small", speciesId: "epipremnum-aureum", potDiameterCm: 10, schedules: sch(at(-1)) },
+    { id: "p-b", nickname: "B big", speciesId: "epipremnum-aureum", potDiameterCm: 30, schedules: sch(at(0)) },
+    { id: "p-c", nickname: "C fine", speciesId: "epipremnum-aureum", potDiameterCm: 15, schedules: sch(at(4)) }] }));
+  await page.goto(base + "/#/settings");
+  await page.waitForSelector("#importInput", { state: "attached" });
+  await page.setInputFiles("#importInput", file);
+  await page.waitForSelector("#bulkBtn");
+
+  await page.click("#bulkBtn");
+  await page.click("#pickWaterDue");
+  await page.waitForFunction(() => document.querySelector("#pickCount").textContent === "2 selected");
+  assert.deepEqual(await page.$$eval(".tile.pick.on .tile-name", (e) => e.map((x) => x.textContent).sort()), ["A small", "B big"]);
+  await page.click("#bulkWater");
+  await page.waitForSelector("#bulkBtn"); // back to the normal home view
+  const evs = await page.evaluate(() => DB.all("events"));
+  assert.equal(evs.length, 2);
+  const ml = Object.fromEntries(evs.map((e) => [e.plantId, e.amountMl]));
+  assert.ok(ml["p-b"] > ml["p-a"], "each plant gets its own amount");
+  assert.equal(await page.$("#needTiles"), null, "nothing left to water");
+
+  // Undo removes both and restores both schedules.
+  await page.click(".toast-btn");
+  for (let i = 0; i < 50 && (await page.evaluate(() => DB.all("events"))).length; i++) await page.waitForTimeout(100);
+  assert.equal((await page.evaluate(() => DB.all("events"))).length, 0);
+  const a = await page.evaluate(() => DB.get("plants", "p-a"));
+  assert.equal(a.schedules.water.next, at(-1));
+
+  // Feed three at once with one chosen feed.
+  await page.waitForSelector("#bulkBtn");
+  await page.click("#bulkBtn");
+  await page.click("#pickAll");
+  await page.click("#bulkFeed");
+  await page.waitForSelector("#bulkFeedForm");
+  const feed = await page.$eval("#bulkFeedForm input[name=feed]:checked", (e) => e.value);
+  await page.click("#bulkFeedForm button[type=submit]");
+  await page.waitForSelector("#bulkBtn");
+  const fed = await page.evaluate(() => DB.all("events"));
+  assert.equal(fed.length, 3);
+  assert.ok(fed.every((e) => e.kind === "fertilize" && e.text === feed));
+
+  // Cancel leaves selection mode without logging anything.
+  await page.click("#bulkBtn");
+  await page.click(".tile.pick");
+  await page.click("#pickCancel");
+  await page.waitForSelector("#bulkBtn");
+  assert.equal((await page.evaluate(() => DB.all("events"))).length, 3);
+  await clean(page);
+  await ctx.close();
+});

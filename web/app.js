@@ -234,7 +234,7 @@ async function deletePlant(plant) {
 
 /* ---------- Router ---------- */
 const view = () => $("#view");
-const state = { filter: "all", query: "" };
+const state = { filter: "all", query: "", pick: null }; // pick: Set of plant ids while logging several plants at once
 
 function setChrome({ title, back = false, action = null, tab }) {
   $("#title").textContent = title;
@@ -254,7 +254,8 @@ async function route() {
   const [path, qs] = hash.split("?");
   const parts = path.split("/");
   const params = new URLSearchParams(qs || "");
-  window.scrollTo(0, 0);
+  if (parts[0] !== "garden") state.pick = null;
+  if (!state.pick) window.scrollTo(0, 0);
   try {
     if (parts[0] === "garden") await renderGarden();
     else if (parts[0] === "plant" && parts[1]) await renderPlant(parts[1]);
@@ -284,6 +285,7 @@ function chipHTML(plant, item) {
 }
 
 function tileHTML({ p, s, items }) {
+  if (state.pick) return pickTileHTML({ p, s, items });
   const prof = profile(p.speciesId);
   const due = items.filter((x) => x.days <= 0);
   const chips = due.length ? due.slice(0, 3).map((x) => chipHTML(p, x)).join("") + (due.length > 3 ? `<span class="chip more">+${due.length - 3}</span>` : "")
@@ -297,6 +299,21 @@ function tileHTML({ p, s, items }) {
       <div class="chips">${chips}</div>
     </a>`;
 }
+
+/** In "log several" mode a tile is a toggle button instead of a link. */
+function pickTileHTML({ p, s }) {
+  const on = state.pick.has(p.id);
+  const water = waterML(p);
+  return `
+    <button type="button" class="tile pick ${esc(s.level)}${on ? " on" : ""}" data-pick="${esc(p.id)}" aria-pressed="${on}" aria-label="${esc(p.nickname)}">
+      <div class="tile-photo" data-photo="${esc(p.photoId || "")}">${I.leaf}</div>
+      <span class="tile-check" aria-hidden="true">${on ? "✓" : ""}</span>
+      <div class="tile-name">${esc(p.nickname)}</div>
+      <div class="chips"><span class="chip">${I.drop}${water ? esc(water.ml + " ml") : "—"}</span></div>
+    </button>`;
+}
+
+const waterDue = (x) => x.items.some((i) => i.kind === "water" && i.days <= 0);
 
 async function renderGarden() {
   setChrome({ title: "My Garden", tab: "garden", action: { icon: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>', label: "Add plant", primary: true, fn: () => (location.hash = "#/edit") } });
@@ -327,18 +344,51 @@ async function renderGarden() {
 
   const pill = (key, label, n) => `<button class="pill ${state.filter === key ? "on" : ""}" data-f="${esc(key)}">${esc(label)}${n != null ? `<span class="n">${n}</span>` : ""}</button>`;
   const outlook = await outlookHTML(plants);
+  const picking = !!state.pick;
+  const n = picking ? state.pick.size : 0;
   view().innerHTML = `
     <div class="pills">
       ${pill("all", "All rooms", plants.length)}
       ${rooms.map((r) => pill("room:" + r, r)).join("")}
     </div>
+    ${picking ? `
+    <div class="pick-bar" role="region" aria-label="Log several plants">
+      <div class="pick-head"><b id="pickCount">${n} selected</b><button type="button" class="link-btn" id="pickCancel">Cancel</button></div>
+      <div class="pick-quick">
+        <button type="button" class="btn small" id="pickWaterDue">${I.drop} Due for water</button>
+        <button type="button" class="btn small" id="pickAll">All shown</button>
+        <button type="button" class="btn small" id="pickNone">Clear</button>
+      </div>
+    </div>` : `<button type="button" class="btn block bulk-btn" id="bulkBtn">${I.drop} Log watering or feeding for several plants</button>`}
     <h3 class="sec-h" id="needH">Needs attention <span class="n">${need.length}</span>${lateN ? ` <span class="badge late">${lateN} late</span>` : ""}</h3>
     ${need.length ? `<div class="tiles" id="needTiles">${need.map(tileHTML).join("")}</div>`
       : `<p class="muted all-done">${I.leaf} Nothing needs you today.</p>`}
     ${fine.length ? `<h3 class="sec-h">All good <span class="n">${fine.length}</span></h3>
     <div class="tiles" id="okTiles">${fine.map(tileHTML).join("")}</div>` : ""}
     <p class="small muted legend"><span class="chip late">${I.drop}late</span> <span class="chip due">${I.drop}today</span> <span class="chip soon">${I.drop}3d</span> next care · <span class="legend-kid">${I.alert}</span> keep away from kids</p>
-    ${outlook}`;
+    ${picking ? "" : outlook}
+    ${picking ? `
+    <div class="bulk-actions">
+      <button type="button" class="btn primary" id="bulkWater" ${n ? "" : "disabled"}>${I.drop} Water ${n}</button>
+      <button type="button" class="btn" id="bulkFeed" ${n ? "" : "disabled"}>${I.feed} Fertilize ${n}</button>
+    </div>` : ""}`;
+  if (picking) {
+    const shown = [...need, ...fine];
+    const set = (ids) => { state.pick = new Set(ids); renderGarden(); };
+    view().querySelectorAll("[data-pick]").forEach((b) => b.addEventListener("click", () => {
+      const id = b.dataset.pick;
+      state.pick.has(id) ? state.pick.delete(id) : state.pick.add(id);
+      renderGarden();
+    }));
+    $("#pickWaterDue").onclick = () => set(shown.filter(waterDue).map((x) => x.p.id));
+    $("#pickAll").onclick = () => set(shown.map((x) => x.p.id));
+    $("#pickNone").onclick = () => set([]);
+    $("#pickCancel").onclick = () => { state.pick = null; renderGarden(); };
+    $("#bulkWater").onclick = () => bulkWater([...state.pick]);
+    $("#bulkFeed").onclick = () => bulkFeedSheet([...state.pick]);
+  } else {
+    $("#bulkBtn").onclick = () => { state.pick = new Set(); renderGarden(); };
+  }
   view().querySelectorAll(".pill").forEach((b) => b.addEventListener("click", () => { state.filter = b.dataset.f; renderGarden(); }));
   const wx = $("#wxBtn");
   if (wx) wx.addEventListener("click", () => checkWeather(wx));
@@ -621,6 +671,59 @@ function feedSheet(plant, prof) {
     const name = e.target.feed.value;
     el.remove();
     await quickLog(plant, "fertilize", null, name && name !== "Something else" ? { text: name } : {});
+  };
+}
+
+/** Logs the same care for several plants; returns [plantId, eventId] pairs so it can be undone. */
+async function bulkLog(ids, kind, extraFor) {
+  const done = [];
+  for (const id of ids) {
+    const plant = await DB.get("plants", id);
+    if (!plant) continue;
+    const ev = await logCare(plant, kind, extraFor(plant));
+    done.push([plant.id, ev.id]);
+  }
+  return done;
+}
+
+function bulkDone(kind, done) {
+  state.pick = null;
+  renderGarden();
+  toast(`${CARE[kind].past} ${done.length} plant${done.length === 1 ? "" : "s"}`, {
+    label: "Undo",
+    fn: async () => { for (const [pid, eid] of done) await deleteEvent(pid, eid); toast("Undone"); route(); }
+  });
+}
+
+async function bulkWater(ids) {
+  // Each plant gets its own amount, from its own pot size and species.
+  const done = await bulkLog(ids, "water", (plant) => { const w = waterML(plant); return w ? { amountMl: w.ml } : {}; });
+  bulkDone("water", done);
+}
+
+async function bulkFeedSheet(ids) {
+  const plants = (await Promise.all(ids.map((id) => DB.get("plants", id)))).filter(Boolean);
+  const profs = plants.map((p) => profile(p.speciesId)).filter(Boolean);
+  const names = [];
+  const add = (n, g) => { if (!names.some(([x]) => x === n)) names.push([n, g]); };
+  profs.forEach((pr) => pr.fertilizer.homemade.forEach((x) => add(x.name, "Homemade")));
+  profs.forEach((pr) => pr.fertilizer.storeBought.forEach((x) => add(x.name, "Store-bought")));
+  add("Something else", "");
+  const resting = plants.filter((p) => C.fertilizeResumes(profile(p.speciesId))).length;
+  const el = sheet(`
+    <h3>What did you feed ${plants.length} plant${plants.length === 1 ? "" : "s"}?</h3>
+    ${resting ? `<p class="small muted">${resting} of them ${resting === 1 ? "is" : "are"} in the winter rest and don't need feeding until March.</p>` : ""}
+    <form id="bulkFeedForm">
+      <div class="opts">${names.map(([n, g], i) => `<label class="opt"><input type="radio" name="feed" value="${esc(n)}" ${i === 0 ? "checked" : ""}><span><b>${esc(n)}</b><small>${esc(g)}</small></span></label>`).join("")}</div>
+      <div class="row-btns"><button type="button" class="btn" id="bulkFeedCancel">Cancel</button><button class="btn primary" type="submit">Log feed for ${plants.length}</button></div>
+    </form>`);
+  $("#bulkFeedCancel", el).onclick = () => el.remove();
+  $("#bulkFeedForm", el).onsubmit = async (e) => {
+    e.preventDefault();
+    const name = e.target.feed.value;
+    el.remove();
+    const done = await bulkLog(plants.map((p) => p.id), "fertilize", () => (name && name !== "Something else" ? { text: name } : {}));
+    bulkDone("fertilize", done);
   };
 }
 
